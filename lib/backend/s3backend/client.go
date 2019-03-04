@@ -145,7 +145,7 @@ func (c *Client) Stat(namespace, name string) (*core.BlobInfo, error) {
 		if isNotFound(err) {
 			return nil, backenderrors.ErrBlobNotFound
 		}
-		return nil, err
+		return nil, fmt.Errorf("stat %s: %s", path, err)
 	}
 	var size int64
 	if output.ContentLength != nil {
@@ -178,7 +178,7 @@ func (c *Client) Download(namespace, name string, dst io.Writer) error {
 		if isNotFound(err) {
 			return backenderrors.ErrBlobNotFound
 		}
-		return err
+		return fmt.Errorf("download %s: %s", path, err)
 	}
 
 	if capBuf, ok := writerAt.(*rwutil.CappedBuffer); ok {
@@ -204,7 +204,7 @@ func (c *Client) Upload(namespace, name string, src io.Reader) error {
 	_, err = c.s3.Upload(input, func(u *s3manager.Uploader) {
 		u.LeavePartsOnError = false // Delete the parts if the upload fails.
 	})
-	return err
+	return fmt.Errorf("upload %s: %s", path, err)
 }
 
 func isNotFound(err error) bool {
